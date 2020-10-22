@@ -33,4 +33,9 @@ class UtilsTest extends Specification {
     then:
     files.size() > 0
   }
+
+  def "test zoneId"() {
+    expect:
+    ZoneId.systemDefault() == ZoneId.of("Australia/Melbourne")
+  }
 }

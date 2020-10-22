@@ -12,7 +12,7 @@ I create this utility mainly to help me to organize my pictures. By renaming all
 3. run command
 
 ```shesll
-java -jar batch-rename-files-by-time-all.jar
+java -jar ./build/libs/batch-rename-files-by-time-all.jar  <target folder>
 ```
 
 **NOTE** It is recommended to backup your files first.
