@@ -3,12 +3,12 @@ package me.ryang.files
 import groovy.io.FileType
 
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.FileTime
-import java.time.Instant
 import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.temporal.TemporalField;
+import java.util.stream.Collectors
 
 class Utils {
 
@@ -22,10 +22,7 @@ class Utils {
   }
 
   static void renameAllFiles(String path) {
-    if (path == null || path.length() == 0) {
-      path = System.getProperty("user.dir")
-    }
-    def files = Utils.readAllFiles(path);
+    def files = listAllFiles(path)
     files.each { f ->
       GString filename = creationTimeToFileName(f)
       renameFile(f, filename)
@@ -59,6 +56,32 @@ class Utils {
 
   static def getFileExtension(String filename) {
     filename.substring(filename.lastIndexOf('.') + 1)
+    }
+
+  static def groupAllFiles(String path) {
+    List<File> files = listAllFiles(path)
+    files = files.findAll {it.file}
+    files.each { f ->
+      println f.getName()
+      def names = f.getName().split("-")
+      if (names.length < 2) {
+        return
+      }
+      def month = names[1]
+      def targetDir = "${path}/${month}".toString()
+      def targetFile = "${path}/${month}/${f.getName()}".toString()
+      def targetPath = new File(targetDir)
+      if (!f.exists() || !f.isDirectory()) {
+        Files.createDirectories(targetPath.toPath())
+      }
+      Files.move(f.toPath(), Paths.get(targetFile))
+    }
   }
 
+  private static List<File> listAllFiles(String path) {
+    if (path == null || path.length() == 0) {
+      path = System.getProperty("user.dir")
+    }
+    Utils.readAllFiles(path)
+  }
 }
