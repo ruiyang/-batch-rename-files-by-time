@@ -3,6 +3,7 @@ package me.ryang.files
 import spock.lang.Specification
 
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.FileTime
 import java.time.ZoneId
@@ -32,6 +33,32 @@ class UtilsTest extends Specification {
 
     then:
     files.size() > 0
+  }
+
+  def "should handle duplicate files"() {
+    given:
+    def fileName = "file1.txt"
+    def src = new File(this.getClass().getResource("/files/duplicates/${fileName}").getPath())
+    def outputDir = "./build/duplicates/"
+    def srcFileName = "${outputDir}/${fileName}"
+
+    def outputPath = new File(outputDir)
+    outputPath.mkdirs()
+
+    Files.deleteIfExists(Path.of(srcFileName.toString()))
+    def out = new File(srcFileName)
+    Files.copy(src.toPath(), out.toPath())
+
+    def srcFile = new File(srcFileName)
+    when:
+    Utils.renameFile(srcFile, "new-name")
+    Utils.renameFile(srcFile, "new-name")
+    Utils.renameFile(srcFile, "new-name")
+
+    then:
+    new File("${outputDir}/new-name.txt").exists()
+    new File("${outputDir}/new-name_1.txt").exists()
+    new File("${outputDir}/new-name_2.txt").exists()
   }
 
   def "test zoneId"() {
