@@ -3,12 +3,10 @@ package me.ryang.files
 import groovy.io.FileType
 
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.FileTime
 import java.time.ZoneId
-import java.util.stream.Collectors
 
 class Utils {
 
@@ -31,8 +29,8 @@ class Utils {
 
 
   static GString creationTimeToFileName(File f) {
-    BasicFileAttributes attr = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
-    FileTime fileTime = attr.creationTime();
+    BasicFileAttributes attr = Files.readAttributes(f.toPath(), BasicFileAttributes.class)
+    FileTime fileTime = attr.creationTime()
     def instant = fileTime.toInstant()
     def zonedDateTime = instant.atZone(ZoneId.systemDefault())
     def year = zonedDateTime.getYear()
