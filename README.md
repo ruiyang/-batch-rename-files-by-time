@@ -15,4 +15,10 @@ I create this utility mainly to help me to organize my pictures. By renaming all
 java -jar ./build/libs/batch-rename-files-by-time-all.jar  <target folder>
 ```
 
+4. options:
+
+- 1. Rename all filed to YYYY-MM-dd-HHMMSS
+- 2. Group files to folders based on YYYY
+- 3. Group files to folders based on YYYY/MM
+
 **NOTE** It is recommended to backup your files first.
