@@ -5,6 +5,8 @@ import spock.lang.Specification
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.FileTime
 import java.time.ZoneId
 
 class UtilsTest extends Specification {
@@ -22,37 +24,45 @@ class UtilsTest extends Specification {
   }
 
   def "should rename all files"() {
-    when:
-    def path = "/Users/ruiyang/tmp/react-example/src2"
-    def files = Utils.readAllFiles(path);
-    files.each { f ->
-      GString filename = Utils.renameAllFiles()
-      renameFile(f, filename)
+    given:
+    def src = new File("src/test/resources/files/rename-files-based-on-time")
+    def outputDir = "build/rename-files-based-on-time"
+    FileUtils.deleteDirectory(new File(outputDir))
+    def outputPath = new File(outputDir)
+    outputPath.mkdirs()
+
+    def srcFiles = Utils.listAllFiles(src.getPath())
+    srcFiles.each { f ->
+      def target = new File("${outputDir}/${f.getName()}")
+      FileUtils.copyFile(f, target, true)
     }
 
+    when:
+    Utils.renameAllFiles(outputDir)
+    def outputFiles = Utils.listAllFiles(outputDir).collect {it.name}
+
     then:
-    files.size() > 0
+    outputFiles.containsAll(["2020-11-22-225800.txt", "2020-11-22-223128.txt", "2020-11-22-222333.txt"])
   }
 
   def "should handle duplicate files"() {
     given:
-    def fileName = "file1.txt"
-    def src = new File(this.getClass().getResource("/files/duplicates/${fileName}").getPath())
+    def src = new File(this.getClass().getResource("/files/duplicates").getPath())
     def outputDir = "./build/duplicates/"
-    def srcFileName = "${outputDir}/${fileName}"
 
+    FileUtils.deleteDirectory(new File(outputDir))
     def outputPath = new File(outputDir)
     outputPath.mkdirs()
 
-    Files.deleteIfExists(Path.of(srcFileName.toString()))
-    def out = new File(srcFileName)
-    Files.copy(src.toPath(), out.toPath())
+    def files = Utils.listAllFiles(src.getPath())
+    files.each { f->
+      Files.copy(f.toPath(), new File("${outputDir}/${f.getName()}").toPath())
+    }
 
-    def srcFile = new File(srcFileName)
     when:
-    Utils.renameFile(srcFile, "new-name")
-    Utils.renameFile(srcFile, "new-name")
-    Utils.renameFile(srcFile, "new-name")
+    Utils.listAllFiles(outputPath.getPath()).each { f ->
+      Utils.renameFile(f, "new-name")
+    }
 
     then:
     new File("${outputDir}/new-name.txt").exists()

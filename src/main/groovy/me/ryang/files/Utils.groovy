@@ -47,15 +47,13 @@ class Utils {
   }
 
   static def renameFile(File file, String newName, int duplicateCount = -1) {
+    def oldNewName = newName
     newName = duplicateCount > -1 ? "${newName}_${duplicateCount + 1}" : newName
     def newNameWithExtension = newName + "." + getFileExtension(file.getName())
     def newFileFullPath = file.getParent() + "/" + newNameWithExtension
     def newFile = new File(newFileFullPath)
-//    println newFile.name
-//    println newFile.exists()
-//    println duplicateCount
     if (newFile.exists() && duplicateCount < 20) {
-      renameFile(file, newName, duplicateCount + 1)
+      renameFile(file, oldNewName, duplicateCount + 1)
       return
     } else if (duplicateCount >= 20) {
       throw new RuntimeException("too many duplicates pictures at the same time ${file.getName()}, are you sure??")
