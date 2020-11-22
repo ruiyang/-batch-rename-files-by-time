@@ -70,7 +70,7 @@ class Utils {
     filename.substring(filename.lastIndexOf('.') + 1)
   }
 
-  static def groupAllFiles(String path) {
+  static def groupAllFilesByYear(String path) {
     List<File> files = listAllFiles(path)
     files = files.findAll { it.file }
     files.each { f ->
@@ -79,9 +79,29 @@ class Utils {
       if (names.length < 2) {
         return
       }
+      def year = names[0]
+      def targetFile = new File("${path}/${year}/${f.getName()}".toString())
+      def targetPath = targetFile.getParentFile()
+      if (!targetPath.exists() || !targetPath.isDirectory()) {
+        Files.createDirectories(targetPath.toPath())
+      }
+      Files.move(f.toPath(), targetFile.toPath())
+    }
+  }
+
+  static def groupAllFilesByYearAndMonth(String path) {
+    List<File> files = listAllFiles(path)
+    files = files.findAll { it.file }
+    files.each { f ->
+      println f.getName()
+      def names = f.getName().split("-")
+      if (names.length < 2) {
+        return
+      }
+      def year = names[0]
       def month = names[1]
-      def targetDir = "${path}/${month}".toString()
-      def targetFile = "${path}/${month}/${f.getName()}".toString()
+      def targetDir = "${path}/${year}/${month}".toString()
+      def targetFile = "${targetDir}/${f.getName()}".toString()
       def targetPath = new File(targetDir)
       if (!f.exists() || !f.isDirectory()) {
         Files.createDirectories(targetPath.toPath())
@@ -90,7 +110,7 @@ class Utils {
     }
   }
 
-  private static List<File> listAllFiles(String path) {
+  static List<File> listAllFiles(String path) {
     if (path == null || path.length() == 0) {
       path = System.getProperty("user.dir")
     }

@@ -1,11 +1,10 @@
 package me.ryang.files
 
+import org.apache.commons.io.FileUtils
 import spock.lang.Specification
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.attribute.FileTime
 import java.time.ZoneId
 
 class UtilsTest extends Specification {
@@ -65,4 +64,51 @@ class UtilsTest extends Specification {
     expect:
     ZoneId.systemDefault() == ZoneId.of("Australia/Melbourne")
   }
+
+  def "test groupAllFilesByYear"() {
+    given:
+    def src = new File(this.getClass().getResource("/files/group-files").getPath())
+    def outputDir = "./build/group-files-year"
+    def srcFiles = Utils.listAllFiles(src.getPath())
+
+    FileUtils.deleteDirectory(new File(outputDir))
+    def outputPath = new File(outputDir)
+    outputPath.mkdirs()
+
+    srcFiles.each { f ->
+      Files.copy(f.toPath(), new File("${outputDir}/${f.getName()}").toPath())
+    }
+
+    when:
+    Utils.groupAllFilesByYear(outputDir)
+    String [] filter = ["txt"]
+    def files = FileUtils.listFiles(new File(outputDir), filter, true).collect {it.getPath()}
+
+    then:
+    files.containsAll(["${outputDir}/2019/2019-07-01-112233.txt".toString(), "${outputDir}/2018/2018-06-01-112233.txt".toString()])
+  }
+
+  def "test groupAllFilesByYearAndMonth"() {
+    given:
+    def src = new File(this.getClass().getResource("/files/group-files").getPath())
+    def outputDir = "./build/group-files-year-month"
+    def srcFiles = Utils.listAllFiles(src.getPath())
+
+    FileUtils.deleteDirectory(new File(outputDir))
+    def outputPath = new File(outputDir)
+    outputPath.mkdirs()
+
+    srcFiles.each { f ->
+      Files.copy(f.toPath(), new File("${outputDir}/${f.getName()}").toPath())
+    }
+
+    when:
+    Utils.groupAllFilesByYearAndMonth(outputDir)
+    String [] filter = ["txt"]
+    def files = FileUtils.listFiles(new File(outputDir), filter, true).collect {it.getPath()}
+
+    then:
+    files.containsAll(["${outputDir}/2019/07/2019-07-01-112233.txt".toString(), "${outputDir}/2018/06/2018-06-01-112233.txt".toString()])
+  }
+
 }
